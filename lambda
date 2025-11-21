@@ -1,1 +1,50 @@
 
+import json
+import boto3
+
+s3 = boto3.client('s3')
+
+def lambda_handler(event, context):
+    try:
+        print("Received event:", json.dumps(event))
+        
+        # Extract the actual data from API Gateway's complex event
+        if 'body' in event:
+            # API Gateway sends data in 'body' field
+            body = json.loads(event['body'])
+            source_bucket = body['sourceBucket']
+            source_key = body['sourceKey']
+            dest_bucket = body['destinationBucket']
+        else:
+            # Direct Lambda invocation (testing)
+            source_bucket = event['sourceBucket']
+            source_key = event['sourceKey']
+            dest_bucket = event['destinationBucket']
+        
+        print(f"Processing: {source_bucket}/{source_key}")
+        
+        # Copy file between buckets
+        copy_source = {'Bucket': source_bucket, 'Key': source_key}
+        new_key = f"processed-{source_key}"
+        
+        s3.copy_object(
+            Bucket=dest_bucket,
+            Key=new_key,
+            CopySource=copy_source
+        )
+        
+        return {
+            'statusCode': 200,
+            'body': json.dumps({
+                'message': 'File processed successfully!',
+                'processed_file': new_key,
+                'status': 'SUCCESS'
+            })
+        }
+        
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return {
+            'statusCode': 500,
+            'body': json.dumps(f'Error: {str(e)}')
+        }
