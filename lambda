@@ -48,3 +48,12 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': json.dumps(f'Error: {str(e)}')
         }
+
+
+//////////////////////////////////////////////////////////////
+//Test event
+{
+  "sourceBucket": "philipngui-original-images",
+  "sourceKey": "Profile Picture.jpg",
+  "destinationBucket": "philipngui-resized-images"
+}
