@@ -1,1 +1,33 @@
 
+{
+  "Comment": "Image Processing Workflow",
+  "StartAt": "ProcessImage",
+  "States": {
+    "ProcessImage": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-2:554909494907:function:ImageResizeFunction",
+        "Payload.$": "$"
+      },
+      "Next": "CheckResult"
+    },
+    "CheckResult": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.Payload.statusCode",
+          "NumericEquals": 200,
+          "Next": "SuccessState"
+        }
+      ],
+      "Default": "FailState"
+    },
+    "SuccessState": {
+      "Type": "Succeed"
+    },
+    "FailState": {
+      "Type": "Fail"
+    }
+  }
+}
